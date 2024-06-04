@@ -21,15 +21,47 @@ class ConnectFour {
     Screen.setGridlines(true);
 
     // Replace this with real commands
-    Screen.addCommand('t', 'test command (remove)', ConnectFour.testCommand);
+    Screen.addCommand('left', 'move left', this.cursor.left.bind(this.cursor));
+    Screen.addCommand('right', 'move right', this.cursor.right.bind(this.cursor));
+    Screen.addCommand('return', 'place a move', this.placeMove.bind(this));
 
     this.cursor.setBackgroundColor();
     Screen.render();
   }
 
-  // Remove this
-  static testCommand() {
-    console.log("TEST COMMAND");
+  placeMove(){
+    for (let i = this.grid.length - 1; i >= 0; i--){
+      let row = this.grid[i];
+
+      if (row[this.cursor.col] === ' ' && this.playerTurn === "O"){
+        Screen.setGrid(i, this.cursor.col, this.playerTurn);
+        row[this.cursor.col] = this.playerTurn;
+        this.playerTurn = "X";
+        this.cursor.cursorColor = "magenta";
+        this.cursor.setBackgroundColor();
+
+        if (ConnectFour.checkWin(this.grid) === false){
+          Screen.render();
+          return;
+        } else {
+          ConnectFour.endGame(ConnectFour.checkWin(this.grid));
+        }
+
+      } else if (row[this.cursor.col] === ' ' && this.playerTurn === "X"){
+        Screen.setGrid(i, this.cursor.col, this.playerTurn);
+        row[this.cursor.col] = this.playerTurn;
+        this.playerTurn = "O";
+        this.cursor.cursorColor = "yellow";
+        this.cursor.setBackgroundColor();
+
+        if (ConnectFour.checkWin(this.grid) === false){
+          Screen.render();
+          return;
+        } else {
+          ConnectFour.endGame(ConnectFour.checkWin(this.grid));
+        }
+      }
+    }
   }
 
   static checkWin(grid) {
@@ -78,11 +110,11 @@ class ConnectFour {
       }
     }
 
+    let sortedX = arrayX.sort();
+    let sortedO = arrayO.sort();
+
     //Iterate through each X and O array to check for each type of win using a nested loop to access both numbers in each nested array
-
-
-    function checkVerticalAndDiagonal(array){
-      array.sort();
+    const checkVertical = (array) => {
 
       for (let i = 0; i < array.length - 3; i++){
         let elem1 = array[i];
@@ -96,15 +128,46 @@ class ConnectFour {
           if (checkConsecutive(sameColumn)){
             return true;
           }
+        }
+      }
+
+      return false;
+    }
+
+    const checkDiagonalDown = (array) => {
+
+      for (let i = 0; i < array.length - 3; i++){
+        let elem1 = array[i];
+        let elem2 = array[i + 1];
+        let elem3 = array[i + 2];
+        let elem4 = array[i + 3];
+
         //Diagonal downward = ascending rows, ascending columns
-        } else if (elem1[1] + 1 === elem2[1] && elem2[1] + 1 === elem3[1] && elem3[1] + 1 === elem4[1]){
+
+        if (elem1[1] + 1 === elem2[1] && elem1[1] + 2 === elem3[1] && elem1[1] + 3 === elem4[1]){
           let ascendingColumn = [elem1[0], elem2[0], elem3[0], elem4[0]];
 
           if (checkConsecutive(ascendingColumn)){
             return true;
           }
+        }
+
+      }
+
+      return false;
+    }
+
+
+    const checkDiagonalUp = (array) =>{
+
+      for (let i = 0; i < array.length - 3; i++){
+        let elem1 = array[i];
+        let elem2 = array[i + 1];
+        let elem3 = array[i + 2];
+        let elem4 = array[i + 3];
         //Diagonal upward = descending rows, ascending columns
-        } else if (elem1[0] + 1 === elem2[0] && elem2[0] + 1 === elem3[0] && elem3[0] + 1 === elem4[0]){
+
+        if (elem1[0] + 1 === elem2[0] && elem1[0] + 2 === elem3[0] && elem1[0] + 3 === elem4[0]){
           let ascendingRow = [elem1[1], elem2[1], elem3[1], elem4[1]];
 
           for (let i = 0; i < ascendingRow.length - 3; i++){
@@ -120,12 +183,23 @@ class ConnectFour {
       return false;
     }
 
-    if (checkVerticalAndDiagonal(arrayO)){
+    if (checkVertical(sortedO)){
       return "O";
-    } else if (checkVerticalAndDiagonal(arrayX)){
+    } else if (checkVertical(sortedX)){
       return "X";
     }
 
+    if (checkDiagonalDown(sortedO)){
+      return "O";
+    } else if (checkDiagonalDown(sortedX)){
+      return "X";
+    }
+
+    if (checkDiagonalUp(sortedO)){
+      return "O";
+    } else if (checkDiagonalUp(sortedX)){
+      return "X";
+    }
     // Return 'X' if player X wins
     // Return 'O' if player O wins
     // Return 'T' if the game is a tie

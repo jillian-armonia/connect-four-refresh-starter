@@ -22,30 +22,29 @@ class Cursor {
     Screen.setBackgroundColor(this.row, this.col, this.cursorColor);
   }
 
-  down(){
-    if (this.row < this.numRows - 1 && this.row >= 0){
-      this.row++;
-    }
-  }
-
-  up(){
-    if (this.row < this.numRows && this.row > 0){
-      this.row--;
-    }
-  }
 
   left() {
     // Move cursor left
+    this.resetBackgroundColor();
+
     if (this.col < this.numCols && this.col > 0){
       this.col--;
     }
+
+    this.setBackgroundColor();
+    Screen.render();
   }
 
   right() {
     // Move cursor right
+    this.resetBackgroundColor();
+
     if (this.col < this.numCols - 1 && this.col >= 0){
       this.col++;
     }
+
+    this.setBackgroundColor();
+    Screen.render();
   }
 
 }
