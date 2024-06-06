@@ -66,11 +66,11 @@ class ConnectFour {
 
   static checkWin(grid) {
     //Create a helper function for consecutive numbers
-    function checkConsecutive(array){
+    function checkConsecutive(array, nestedIndex){
       for (let i = 0; i < array.length - 3; i++){
         let elem = array[i];
 
-        if (elem + 1 === array[i + 1] && elem + 2 === array[i + 2] && elem + 3 === array[i + 3]){
+        if (elem[nestedIndex] + 1 === array[i + 1][nestedIndex] && elem[nestedIndex] + 2 === array[i + 2][nestedIndex] && elem[nestedIndex] + 3 === array[i + 3][nestedIndex]){
           return true;
         }
       }
@@ -113,92 +113,127 @@ class ConnectFour {
     let sortedX = arrayX.sort();
     let sortedO = arrayO.sort();
 
-    //Iterate through each X and O array to check for each type of win using a nested loop to access both numbers in each nested array
-    const checkVertical = (array) => {
-
+    //vertical wins: consecutive rows, same columns
+    function checkVertical(array){
       for (let i = 0; i < array.length - 3; i++){
-        let elem1 = array[i];
-        let elem2 = array[i + 1];
-        let elem3 = array[i + 2];
-        let elem4 = array[i + 3];
-        //Vertical wins = consecutive row numbers, same column
-        if (elem1[1] === elem2[1] && elem1[1] === elem3[1] && elem1[1] === elem4[1]){
-          let sameColumn = [elem1[0], elem2[0], elem3[0], elem4[0]];
-
-          if (checkConsecutive(sameColumn)){
-            return true;
+        let column = array[i][1];
+        let sameColumn = [];
+        for (const element of array){
+          if (element[1] === column){ //Find the elements with the same column value
+            sameColumn.push(element);
           }
+        }
+
+        if (checkConsecutive(sameColumn, 0)){
+          return true;
         }
       }
 
       return false;
     }
 
-    const checkDiagonalDown = (array) => {
+    //diagonal downwards wins: increasing row indexes, increasing column indexes
+    function checkDiagonalDown(array){
+      let potential = [];
 
-      for (let i = 0; i < array.length - 3; i++){
-        let elem1 = array[i];
-        let elem2 = array[i + 1];
-        let elem3 = array[i + 2];
-        let elem4 = array[i + 3];
-
-        //Diagonal downward = ascending rows, ascending columns
-
-        if (elem1[1] + 1 === elem2[1] && elem1[1] + 2 === elem3[1] && elem1[1] + 3 === elem4[1]){
-          let ascendingColumn = [elem1[0], elem2[0], elem3[0], elem4[0]];
-
-          if (checkConsecutive(ascendingColumn)){
-            return true;
-          }
-        }
-
+      if (array.length === 1){
+        return array;
       }
 
-      return false;
-    }
+      function findFirstPotential(){
+        let firstEl;
 
-
-    const checkDiagonalUp = (array) =>{
-
-      for (let i = 0; i < array.length - 3; i++){
-        let elem1 = array[i];
-        let elem2 = array[i + 1];
-        let elem3 = array[i + 2];
-        let elem4 = array[i + 3];
-        //Diagonal upward = descending rows, ascending columns
-
-        if (elem1[0] + 1 === elem2[0] && elem1[0] + 2 === elem3[0] && elem1[0] + 3 === elem4[0]){
-          let ascendingRow = [elem1[1], elem2[1], elem3[1], elem4[1]];
-
-          for (let i = 0; i < ascendingRow.length - 3; i++){
-            let number = ascendingRow[i];
-
-            if (number - 1 === ascendingRow[i + 1] && number - 2 === ascendingRow[i + 2] && number - 3 === ascendingRow[i + 3]){
-              return true;
+        for (let currentEl of array){
+          for (let nextEl of array){ //compares a current element to the same array by iteration
+            if (currentEl[0] + 1 === nextEl[0] && currentEl[1] + 1 === nextEl[1]){
+              return firstEl = nextEl;
             }
           }
         }
       }
 
+      if (findFirstPotential() === undefined){
+        return false;
+      }
+
+      potential.push(findFirstPotential())
+
+      for (let next of array){
+        if (potential[potential.length - 1][0] + 1 === next[0] && potential[potential.length - 1][1] + 1 === next[1]){
+          potential.push(next)
+        }
+      }
+
+      if (potential.length < 3){
+        let newArray = array.filter((element) => {
+          if(!potential.includes(element)){
+            return true;
+          }
+        })
+
+        potential = [];
+        return checkDiagonalDown(newArray);
+      } else if (potential.length >= 3){
+
+        return true;
+      }
+
       return false;
     }
 
-    if (checkVertical(sortedO)){
-      return "O";
-    } else if (checkVertical(sortedX)){
-      return "X";
+   //diagonal upward wins: increasing row indexes, decreasing column indexes
+   function checkDiagonalUp(array){
+    let potential = [];
+
+    if (array.length === 1){
+      return array;
     }
 
-    if (checkDiagonalDown(sortedO)){
-      return "O";
-    } else if (checkDiagonalDown(sortedX)){
-      return "X";
+    function findFirstPotential(){
+      let firstEl;
+
+      for (let currentEl of array){
+        for (let nextEl of array){ //compares a current element to the same array by iteration
+          if (currentEl[0] + 1 === nextEl[0] && currentEl[1] - 1 === nextEl[1]){
+            return firstEl = nextEl;
+          }
+        }
+      }
     }
 
-    if (checkDiagonalUp(sortedO)){
-      return "O";
-    } else if (checkDiagonalUp(sortedX)){
-      return "X";
+    if (findFirstPotential() === undefined){
+      return false;
+    }
+
+    potential.push(findFirstPotential())
+
+    for (let next of array){
+      if (potential[potential.length - 1][0] + 1 === next[0] && potential[potential.length - 1][1] - 1 === next[1]){
+        potential.push(next)
+      }
+    }
+
+    if (potential.length < 3){
+      let newArray = array.filter((element) => {
+        if(!potential.includes(element)){
+          return true;
+        }
+      })
+
+      potential = [];
+      return checkDiagonalUp(newArray);
+    } else if (potential.length >= 3){
+
+      return true;
+    }
+
+    return false;
+  }
+
+    if (checkVertical(sortedX) || checkDiagonalDown(sortedX) === true|| checkDiagonalUp(sortedX) === true) {
+      return 'X';
+    } else if (checkVertical(sortedO) || checkDiagonalDown(sortedO) === true || checkDiagonalUp(sortedO) === true){
+      return 'O';
     }
     // Return 'X' if player X wins
     // Return 'O' if player O wins
