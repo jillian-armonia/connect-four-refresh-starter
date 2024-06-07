@@ -30,7 +30,7 @@ class ConnectFour {
   }
 
   placeMove(){
-    for (let i = this.grid.length - 1; i >= 0; i--){
+    for (let i = this.grid.length - 1; i >= 0; i--){ //Check the moves from the bottom of the grid
       let row = this.grid[i];
 
       if (row[this.cursor.col] === ' ' && this.playerTurn === "O"){
@@ -141,12 +141,11 @@ class ConnectFour {
       }
 
       function findFirstPotential(){
-        let firstEl;
 
         for (let currentEl of array){
           for (let nextEl of array){ //compares a current element to the same array by iteration
             if (currentEl[0] + 1 === nextEl[0] && currentEl[1] + 1 === nextEl[1]){
-              return firstEl = nextEl;
+              return nextEl;
             }
           }
         }
@@ -174,7 +173,6 @@ class ConnectFour {
         potential = [];
         return checkDiagonalDown(newArray);
       } else if (potential.length >= 3){
-
         return true;
       }
 
@@ -190,12 +188,11 @@ class ConnectFour {
     }
 
     function findFirstPotential(){
-      let firstEl;
 
       for (let currentEl of array){
         for (let nextEl of array){ //compares a current element to the same array by iteration
           if (currentEl[0] + 1 === nextEl[0] && currentEl[1] - 1 === nextEl[1]){
-            return firstEl = nextEl;
+            return nextEl;
           }
         }
       }
